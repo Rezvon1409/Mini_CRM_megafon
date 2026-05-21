@@ -14,7 +14,7 @@ class TicketCategory(str , enum.Enum):
     complaint = 'complaint'
     request = 'request'
     consultation = 'consultation'
-    technical = 'tecnical'
+    technical = 'technical'
     billing = 'billing'
 
 class TicketPriority(str , enum.Enum):
@@ -27,7 +27,7 @@ class TicketStatus(str , enum.Enum):
     new = 'new'
     accepted = 'accepted'
     in_progress = 'in_progress'
-    peding = 'peding'
+    pending = 'pending'
     resolved = 'resolved'
     rejected = 'rejected'
     cancelled = 'cancelled'
@@ -45,8 +45,8 @@ class User(Base):
     created_at = Column(DateTime , default=datetime.utcnow , nullable=False)
 
 
-    created_tickets = relationship("Ticket" , back_populates='created_by_id' ,foreign_keys='[Ticket.created_by_id]')
-    assingned_tickets = relationship("Ticket" , back_populates="assigned_to_id" , foreign_keys='[Ticket.assigned_to_id]')
+    created_tickets = relationship("Ticket" , back_populates='created_by' ,foreign_keys='[Ticket.created_by_id]')
+    assingned_tickets = relationship("Ticket" , back_populates="assigned_to" , foreign_keys='[Ticket.assigned_to_id]')
     comments = relationship("Comment" , back_populates='user')
     history_records = relationship('TicketHistory' , back_populates='user')
 
@@ -67,7 +67,7 @@ class Client(Base):
     tickets = relationship('Ticket' , back_populates='client' , cascade='all , delete-orphan') 
 
 
-class TIcket(Base):
+class Ticket(Base):
     __tablename__ = 'tickets'
 
     id = Column(Integer , primary_key=True , index=True , autoincrement=True)
@@ -85,8 +85,8 @@ class TIcket(Base):
 
 
     client = relationship('Client', back_populates='tickets')
-    created_by_id = relationship('User', back_populates='created_tickets' , foreign_keys=[created_by_id])
-    assigned_to_id = relationship('User' , back_populates='assigned_tickets' , foreign_keys=[assigned_to_id])
+    created_by = relationship('User', back_populates='created_tickets' , foreign_keys=[created_by_id])
+    assigned_to = relationship('User' , back_populates='assigned_tickets' , foreign_keys=[assigned_to_id])
     comments = relationship('Comment' , back_populates='ticket' , cascade='all , delete-orphan')
     history = relationship('TicketHIstory' , back_populates='ticket' , cascade='all , delete-orphan')
 

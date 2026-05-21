@@ -1,8 +1,8 @@
-"""Initial database creation
+"""Initial database initialization
 
-Revision ID: ee09546dfb8d
+Revision ID: b02e9129097d
 Revises: 
-Create Date: 2026-05-21 22:51:49.888959
+Create Date: 2026-05-22 00:05:40.095556
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ee09546dfb8d'
+revision: str = 'b02e9129097d'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -53,14 +53,18 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('ticket_number', sa.String(length=20), nullable=False),
     sa.Column('client_id', sa.Integer(), nullable=False),
+    sa.Column('created_by_id', sa.Integer(), nullable=True),
+    sa.Column('assigned_to_id', sa.Integer(), nullable=True),
     sa.Column('category', sa.Enum('complaint', 'request', 'consultation', 'technical', 'billing', name='ticketcategory'), nullable=False),
     sa.Column('priority', sa.Enum('low', 'medium', 'high', 'urgent', name='ticketpriority'), nullable=False),
-    sa.Column('status', sa.Enum('new', 'accepted', 'in_progress', 'peding', 'resolved', 'rejected', 'cancelled', name='ticketstatus'), nullable=False),
+    sa.Column('status', sa.Enum('new', 'accepted', 'in_progress', 'pending', 'resolved', 'rejected', 'cancelled', name='ticketstatus'), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('description', sa.Text(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['assigned_to_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_tickets_id'), 'tickets', ['id'], unique=False)
