@@ -2,6 +2,7 @@ import enum
 from datetime import datetime
 
 from sqlalchemy import Column , Integer , String , Boolean , DateTime , Text , ForeignKey , Enum
+from sqlalchemy.orm import relationship
 from database import Base
 
 class UserRole(str , enum.Enum):
@@ -44,6 +45,13 @@ class User(Base):
     created_at = Column(DateTime , default=datetime.utcnow , nullable=False)
 
 
+    created_tickets = relationship("Ticket" , back_populates='created_by_id' ,foreign_keys='[Ticket.created_by_id]')
+    assingned_tickets = relationship("Ticket" , back_populates="assigned_to_id" , foreign_keys='[Ticket.assigned_to_id]')
+    comments = relationship("Comment" , back_populates='user')
+    history_records = relationship('TicketHistory' , back_populates='user')
+
+
+
 class Client(Base):
     __tablename__ = 'clients'
 
@@ -53,7 +61,10 @@ class Client(Base):
     phone = Column(String(20), nullable=False, index=True)                       
     email = Column(String, nullable=True)                                   
     address = Column(String, nullable=True)                                 
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)   
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)  
+
+
+    tickets = relationship('Ticket' , back_populates='client' , cascade='all , delete-orphan') 
 
 
 class TIcket(Base):
@@ -73,6 +84,13 @@ class TIcket(Base):
     updated_at = Column(DateTime, default=datetime.utcnow , onupdate=datetime.utcnow, nullable=False)
 
 
+    client = relationship('Client', back_populates='tickets')
+    created_by_id = relationship('User', back_populates='created_tickets' , foreign_keys=[created_by_id])
+    assigned_to_id = relationship('User' , back_populates='assigned_tickets' , foreign_keys=[assigned_to_id])
+    comments = relationship('Comment' , back_populates='ticket' , cascade='all , delete-orphan')
+    history = relationship('TicketHIstory' , back_populates='ticket' , cascade='all , delete-orphan')
+
+
 class Comment(Base):
     __tablename__ = "comments"
 
@@ -83,13 +101,21 @@ class Comment(Base):
     is_internal = Column(Boolean, default=False, nullable=False)                
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
+
+    ticket = relationship('Ticket' , back_populates='comments')
+    user = relationship("User" , back_populates='comments')
+
 class TicketHistory(Base):
     __tablename__ = "ticket_history"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     ticket_id = Column(Integer, ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)           
-    field_changed = Column(String(50), nullable=False)                           
-    old_value = Column(String(200), nullable=True)                              
-    new_value = Column(String(200), nullable=True)                              
+    field_changed = Column(String, nullable=False)                           
+    old_value = Column(String, nullable=True)                              
+    new_value = Column(String, nullable=True)                              
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+    ticket = relationship("Ticket", back_populates="history")
+    user = relationship("User", back_populates="history_records")
