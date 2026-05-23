@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth , clients , tickets
 import uvicorn
+from seed import seed_admin_user
 
 app = FastAPI(
     title="Megafon Mini CRM API",
@@ -34,5 +35,8 @@ def read_root():
         "documentation": "/docs"
     }
 
+
+
 if __name__ == '__main__':
+    seed_admin_user()
     uvicorn.run('main:app' , host='127.0.0.1' , port=8000 , reload=True)
