@@ -45,8 +45,8 @@ class User(Base):
     created_at = Column(DateTime , default=datetime.utcnow , nullable=False)
 
 
-    created_tickets = relationship("Ticket" , back_populates='created_by' ,foreign_keys='[Ticket.created_by_id]')
-    assingned_tickets = relationship("Ticket" , back_populates="assigned_to" , foreign_keys='[Ticket.assigned_to_id]')
+    created_tickets = relationship("Ticket", back_populates="created_by", foreign_keys="[Ticket.created_by_id]")
+    assigned_tickets = relationship("Ticket", back_populates="assigned_to", foreign_keys="[Ticket.assigned_to_id]")
     comments = relationship("Comment" , back_populates='user')
     history_records = relationship('TicketHistory' , back_populates='user')
 
@@ -88,7 +88,7 @@ class Ticket(Base):
     created_by = relationship('User', back_populates='created_tickets' , foreign_keys=[created_by_id])
     assigned_to = relationship('User' , back_populates='assigned_tickets' , foreign_keys=[assigned_to_id])
     comments = relationship('Comment' , back_populates='ticket' , cascade='all , delete-orphan')
-    history = relationship('TicketHIstory' , back_populates='ticket' , cascade='all , delete-orphan')
+    history = relationship('TicketHistory' , back_populates='ticket' , cascade='all , delete-orphan')
 
 
 class Comment(Base):
