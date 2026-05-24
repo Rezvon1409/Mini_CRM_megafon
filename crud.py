@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from models import User, Client, Ticket, TicketHistory, TicketStatus
+from models import User, Client, Ticket, TicketHistory, TicketStatus , Comment
 from schemas import UserCreate, ClientCreate, TicketCreate, TicketUpdateFull, TicketListItem, TicketListResponse, TicketFilterParams, DashboardStats
 import auth
 from datetime import datetime
@@ -27,8 +27,24 @@ def get_client_by_account(db: Session, account_number: str):
     return db.query(Client).filter(Client.account_number == account_number).first()
 
 
+def search_clients(db : Session , query_str : str):
+    search = f"%{query_str}%"
+
+    return db.query(Client).filter(or_(
+        Client.account_number.ilike(search),
+        Client.full_name.ilike(search),
+        Client.passport_series.ilike(search)
+    )).all()
+
 def create_client(db: Session, client: ClientCreate):
-    db_client = Client( account_number=client.account_number, full_name=client.full_name, phone=client.phone,  email=client.email, address=client.address)
+    db_client = Client(
+        account_number=client.account_number,
+        full_name=client.full_name,
+        phone=client.phone,
+        email=client.email,
+        address=client.address,
+        passport_series=client.passport_series  
+    )
     db.add(db_client)
     db.commit()
     db.refresh(db_client)
@@ -64,8 +80,7 @@ def get_tickets_filtered(db: Session, filters: TicketFilterParams, page: int = 1
 
     if filters.search_query:
         search = f"%{filters.search_query}%"
-        query = query.join(Client).filter(or_(Ticket.ticket_number.ilike(search), Ticket.title.ilike(search),Client.full_name.ilike(search))
-)
+        query = query.join(Client).filter(or_(Ticket.ticket_number.ilike(search), Ticket.title.ilike(search),Client.full_name.ilike(search)))
 
     total_count = query.count()
     skip = (page - 1) * size
@@ -78,28 +93,71 @@ def get_tickets_filtered(db: Session, filters: TicketFilterParams, page: int = 1
     return TicketListResponse(total_count=total_count, page=page, size=size, items=items)
 
 
-
 def update_ticket(db: Session, ticket: Ticket, payload: TicketUpdateFull, user_id: int):
     update_data = payload.model_dump(exclude_unset=True)
 
+
+    if "comment_text" in update_data and update_data["comment_text"]:
+        comment_text = update_data.pop("comment_text")
+        new_comment = Comment(
+            text=comment_text,
+            ticket_id=ticket.id,
+            user_id=user_id
+        )
+        db.add(new_comment)
+
     for field, new_value in update_data.items():
         if new_value is not None:
-            old_value = getattr(ticket, field)
-    
-            if old_value != new_value:
-                old_val_str = old_value.value if hasattr(old_value, 'value') else str(old_value)
-                new_val_str = new_value.value if hasattr(new_value, 'value') else str(new_value)
+            if hasattr(ticket, field):
+                old_value = getattr(ticket, field)
+        
+                if old_value != new_value:
+                    old_val_str = old_value.value if hasattr(old_value, 'value') else str(old_value)
+                    new_val_str = new_value.value if hasattr(new_value, 'value') else str(new_value)
 
-                history_entry = TicketHistory( ticket_id=ticket.id, user_id=user_id, field_changed=field, old_value=old_val_str if old_value else None,new_value=new_val_str )
-                db.add(history_entry)
-                setattr(ticket, field, new_value)
+                    history_entry = TicketHistory( ticket_id=ticket.id, user_id=user_id, field_changed=field, old_value=old_val_str if old_value else None, new_value=new_val_str )
+                    db.add(history_entry)
+                    setattr(ticket, field, new_value)
 
     ticket.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(ticket)
     return ticket
 
+def search_clients_advanced(db: Session, full_name: str = None, account_number: str = None, passport_series: str = None):
+    query = db.query(Client)
 
+    if account_number:
+        query = query.filter(Client.account_number.ilike(f"%{account_number}%"))
+        
+    if full_name:
+        query = query.filter(Client.full_name.ilike(f"%{full_name}%"))
+        
+    if passport_series:
+        query = query.filter(Client.passport_series.ilike(f"%{passport_series}%"))
+
+    return query.all()
+
+
+def update_client(db: Session, client_obj: Client, payload: ClientCreate):
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(client_obj, field, value)
+    
+    db.commit()
+    db.refresh(client_obj)
+    return client_obj
+
+
+def delete_client(db: Session, client_obj: Client):
+    db.delete(client_obj)
+    db.commit()
+    return True
+
+def delete_ticket(db: Session, ticket_obj: Ticket):
+    db.delete(ticket_obj)
+    db.commit()
+    return True
 def get_dashboard_stats(db: Session):
     total = db.query(Ticket).count()
     

@@ -39,24 +39,22 @@ class UserSimple(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
-
-
 class ClientBase(BaseModel):
     account_number: str = Field(..., min_length=5, max_length=20, description="Megafon client personal account number")
     full_name: str = Field(..., min_length=3, max_length=50, description="Full name of the client")
-    phone: str = Field(..., description="Client phone number in Tajikistan format, e.g., +992927777777")
+    phone: str = Field(..., description="Client phone number")
     email: Optional[EmailStr] = None
     address: Optional[str] = Field(None, max_length=200)
+    passport_series: Optional[str] = Field(None, min_length=5, max_length=15, description="Client passport series (e.g., AТ1234567)")
 
-    
     @field_validator('phone')
     @classmethod
     def validate_tj_phone(cls, value: str):
         clean_phone = value.replace(" ", "")
-        pattern = r'^(\+?992)?(50|55|77|88|90|91|92|93|98|44|33)\d{7}$'
-        if not re.match(pattern, clean_phone):
-            raise ValueError("Invalid phone number! Correct format is +99292XXXXXXX")
+
+        if not clean_phone.lstrip('+').isdigit() or len(clean_phone) < 9:
+            raise ValueError("Format error! Please enter a valid phone number (e.g., +992008991405)")
+            
         return clean_phone
 
 class ClientCreate(ClientBase):
@@ -73,10 +71,9 @@ class ClientSearch(BaseModel):
     account_number: str
     full_name: str
     phone: str
+    passport_series: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
-
-
 
 class CommentCreate(BaseModel):
     text: str = Field(..., min_length=1)
@@ -146,6 +143,7 @@ class TicketUpdateFull(BaseModel):
     priority: Optional[TicketPriority] = None
     status: Optional[TicketStatus] = None
     assigned_to_id: Optional[int] = None
+    comment_text: Optional[str] = None
 
 class TicketListItem(BaseModel):
     id: int

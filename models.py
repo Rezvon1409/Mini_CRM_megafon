@@ -60,7 +60,8 @@ class Client(Base):
     full_name = Column(String, nullable=False, index=True)                  
     phone = Column(String(20), nullable=False, index=True)                       
     email = Column(String, nullable=True)                                   
-    address = Column(String, nullable=True)                                 
+    address = Column(String, nullable=True)
+    passport_series = Column(String, nullable=True)                                 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)  
 
 
