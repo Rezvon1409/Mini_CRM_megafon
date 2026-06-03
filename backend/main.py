@@ -1,0 +1,42 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import auth , clients , tickets
+import uvicorn
+from seed import seed_admin_user
+
+app = FastAPI(
+    title="Megafon Mini CRM API",
+    description="Ticket and Client Automation System of Megafon Tajikistan (Backend)", # Ислоҳ шуд ба англисӣ
+    version="1.0.0",
+    docs_url="/docs",       
+    redoc_url="/redoc"      
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
+
+app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(clients.router, prefix="/api/clients", tags=["Clients"])
+app.include_router(tickets.router, prefix="/api/tickets", tags=["Tickets"])
+
+
+@app.get("/", tags=["Root"])
+def read_root():
+    return {
+        "status": "online",
+        "project": "Megafon Mini CRM",
+        "version": "1.0.0",
+        "environment": "development",
+        "documentation": "/docs"
+    }
+
+
+
+if __name__ == '__main__':
+    seed_admin_user()
+    uvicorn.run('main:app' , host='127.0.0.1' , port=8000 , reload=True)
