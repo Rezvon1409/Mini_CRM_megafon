@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Megafon Tajikistan Mini CRM — Ticket and Client Management System">
+    <title>Megafon Mini CRM</title>
+
+    <!-- Font Awesome 6 Icons via CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Inter for body, Outfit for headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================================
+   1. DESIGN TOKENS & CSS CUSTOM PROPERTIES
+   ========================================================================== */
+:root {
+    /* Background layers (darkest → lightest) */
+    --bg-body:       #0d1117;
+    --bg-sidebar:    #010409;
+    --bg-surface:    #161b22;
+    --bg-elevated:   #1c2333;
+    --bg-hover:      #21262d;
+    --bg-active:     #282e38;
+
+    /* Brand colours */
+    --primary:       #00B752;
+    --primary-hover: #00a048;
+    --primary-muted: rgba(0, 183, 82, 0.12);
+    --primary-glow:  rgba(0, 183, 82, 0.25);
+
+    /* Semantic colours */
+    --blue:    #58a6ff;
+    --purple:  #a371f7;
+    --yellow:  #d29922;
+    --orange:  #f0883e;
+    --green:   #3fb950;
+    --red:     #f85149;
+    --gray:    #8b949e;
+    --teal:    #39d2c0;
+
+    /* Text */
+    --text-primary:   #e6edf3;
+    --text-secondary: #8b949e;
+    --text-tertiary:  #484f58;
+    --text-inverse:   #0d1117;
+
+    /* Borders */
+    --border:       #30363d;
+    --border-hover: #484f58;
+
+    /* Misc */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+    --shadow-xl: 0 16px 48px rgba(0,0,0,0.6);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --sidebar-w: 260px;
+}
+
+/* ==========================================================================
+   2. RESET & BASE TYPOGRAPHY
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 14px; scroll-behavior: smooth; }
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-body);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+img { max-width: 100%; display: block; }
+
+button, input, select, textarea {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+/* ==========================================================================
+   3. LAYOUT SHELL — LOGIN, SIDEBAR, CONTENT
+   ========================================================================== */
+
+/* ---------- Login Page ---------- */
+#login-page {
+    display: none;
+    width: 100vw; height: 100vh;
+    align-items: center; justify-content: center;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(0,183,82,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(88,166,255,0.06) 0%, transparent 50%),
+        var(--bg-body);
+    padding: 20px;
+}
+
+.login-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    width: 100%; max-width: 420px;
+    padding: 48px 36px 36px;
+    box-shadow: var(--shadow-xl);
+    animation: fadeSlideUp 0.5s ease;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-logo .icon-ring {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--primary-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    border: 2px solid rgba(0,183,82,0.3);
+}
+
+.login-logo .icon-ring i { font-size: 2rem; color: var(--primary); }
+.login-logo h2 { font-size: 1.5rem; margin-bottom: 4px; }
+.login-logo p  { color: var(--text-secondary); font-size: 0.92rem; }
+
+/* ---------- App Shell ---------- */
+#app-shell { display: none; }
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 200;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-brand {
+    padding: 20px 20px 16px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-brand .brand-icon {
+    width: 36px; height: 36px; border-radius: var(--radius-md);
+    background: var(--primary-muted);
+    display: flex; align-items: center; justify-content: center;
+}
+
+.sidebar-brand .brand-icon i {
+    font-size: 1.1rem; color: var(--primary);
+    filter: drop-shadow(0 0 6px var(--primary-glow));
+}
+
+.sidebar-brand h2 { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.3px; }
+
+/* Sidebar user card */
+.sidebar-profile {
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.015);
+}
+
+.profile-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem; flex-shrink: 0;
+    color: #fff;
+}
+
+.profile-info { overflow: hidden; }
+.profile-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-role {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--primary);
+}
+
+/* Sidebar nav links */
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+
+.nav-link {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-weight: 500; font-size: 0.92rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    user-select: none;
+}
+
+.nav-link:hover { color: var(--text-primary); background: var(--bg-hover); }
+.nav-link i { width: 20px; text-align: center; font-size: 1rem; }
+
+.nav-link.active {
+    color: var(--text-primary);
+    background: var(--primary-muted);
+}
+
+.nav-link.active::before {
+    content: '';
+    position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--primary);
+}
+
+.sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.logout-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 10px 14px;
+    border-radius: var(--radius-md);
+    color: var(--red);
+    cursor: pointer; font-weight: 500;
+    transition: var(--transition);
+}
+.logout-btn:hover { background: rgba(248,81,73,0.1); }
+
+/* ---------- Main Content ---------- */
+.main-content {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    transition: margin-left 0.3s ease;
+}
+
+.main-header {
+    padding: 24px 32px 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 20px; flex-wrap: wrap;
+}
+
+.page-heading h1 { font-size: 1.6rem; margin-bottom: 2px; }
+.page-heading p  { color: var(--text-secondary); font-size: 0.875rem; }
+
+.main-body { padding: 24px 32px 40px; flex: 1; }
+
+/* Mobile hamburger */
+.mobile-bar {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 56px; background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 201;
+    align-items: center; padding: 0 16px; gap: 12px;
+}
+.mobile-bar .hamburger { font-size: 1.3rem; cursor: pointer; color: var(--text-primary); }
+.mobile-bar h3 { font-size: 1rem; }
+
+/* Mobile overlay behind sidebar */
+.sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 199;
+}
+
+/* ==========================================================================
+   4. PAGE SECTIONS (hidden/shown via JS)
+   ========================================================================== */
+.page { display: none; animation: fadeSlideUp 0.35s ease; }
+.page.active { display: block; }
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   5. DASHBOARD — STAT CARDS
+   ========================================================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 28px;
+}
+
+.stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex; align-items: center; gap: 16px;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-hover);
+}
+
+.stat-card .icon-box {
+    width: 46px; height: 46px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; flex-shrink: 0;
+}
+
+.stat-card .stat-label {
+    font-size: 0.78rem; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+}
+.stat-card .stat-value { font-size: 1.65rem; font-weight: 700; margin-top: 2px; }
+
+/* Icon-box colour variants */
+.icon-box.purple  { background: rgba(163,113,247,0.12); color: var(--purple); }
+.icon-box.blue    { background: rgba(88,166,255,0.12);  color: var(--blue); }
+.icon-box.green   { background: rgba(63,185,80,0.12);   color: var(--green); }
+.icon-box.yellow  { background: rgba(210,153,34,0.12);  color: var(--yellow); }
+.icon-box.orange  { background: rgba(240,136,62,0.12);  color: var(--orange); }
+.icon-box.red     { background: rgba(248,81,73,0.12);   color: var(--red); }
+.icon-box.gray    { background: rgba(139,148,158,0.08); color: var(--gray); }
+.icon-box.teal    { background: rgba(57,210,192,0.12);  color: var(--teal); }
+
+/* ==========================================================================
+   6. REUSABLE COMPONENTS — CONTROLS BAR, TABLES, BADGES, BUTTONS
+   ========================================================================== */
+
+/* Controls bar (search + filters + actions) */
+.controls-bar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 12px; margin-bottom: 20px;
+}
+
+.search-box {
+    position: relative; flex: 1; min-width: 220px; max-width: 380px;
+}
+.search-box i {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--text-tertiary); font-size: 0.9rem;
+}
+.search-box input {
+    width: 100%; background: var(--bg-body);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 9px 12px 9px 36px; color: var(--text-primary);
+    transition: var(--transition);
+}
+.search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-muted);
+}
+.search-box input::placeholder { color: var(--text-tertiary); }
+
+.filter-select {
+    background: var(--bg-body);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 9px 12px; color: var(--text-primary);
+    min-width: 130px; cursor: pointer;
+    transition: var(--transition);
+}
+.filter-select:focus { border-color: var(--primary); }
+
+/* Buttons */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 9px 18px; border-radius: var(--radius-md);
+    font-weight: 600; font-size: 0.875rem;
+    cursor: pointer; transition: var(--transition);
+    white-space: nowrap;
+}
+
+.btn-primary   { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); box-shadow: 0 3px 10px var(--primary-glow); }
+
+.btn-outline {
+    background: transparent; color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+.btn-outline:hover { background: var(--bg-hover); border-color: var(--border-hover); }
+
+.btn-danger-outline {
+    background: transparent; color: var(--red);
+    border: 1px solid rgba(248,81,73,0.3);
+}
+.btn-danger-outline:hover { background: rgba(248,81,73,0.1); border-color: var(--red); }
+
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #e5443d; }
+
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: var(--radius-sm); }
+.btn-xs { padding: 4px 8px; font-size: 0.75rem; border-radius: var(--radius-sm); }
+
+.btn:disabled {
+    opacity: 0.45; cursor: not-allowed; pointer-events: none;
+}
+
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Tables */
+.table-wrapper {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.table-scroll { overflow-x: auto; }
+
+table {
+    width: 100%; border-collapse: collapse; text-align: left;
+}
+
+thead th {
+    background: rgba(255,255,255,0.02);
+    color: var(--text-secondary);
+    font-weight: 600; font-size: 0.78rem;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    font-size: 0.88rem; vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--bg-hover); }
+
+.table-empty {
+    text-align: center; color: var(--text-secondary);
+    padding: 48px 20px !important;
+}
+.table-empty i { font-size: 2rem; margin-bottom: 8px; display: block; color: var(--text-tertiary); }
+
+/* Badges */
+.badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+/* Status badges */
+.badge-new        { background: rgba(88,166,255,0.12); color: var(--blue); }
+.badge-accepted   { background: rgba(163,113,247,0.12); color: var(--purple); }
+.badge-in_progress { background: rgba(210,153,34,0.12); color: var(--yellow); }
+.badge-pending    { background: rgba(240,136,62,0.12); color: var(--orange); }
+.badge-resolved   { background: rgba(63,185,80,0.12); color: var(--green); }
+.badge-rejected   { background: rgba(248,81,73,0.12); color: var(--red); }
+.badge-cancelled  { background: rgba(139,148,158,0.08); color: var(--gray); }
+
+/* Priority badges */
+.badge-low    { background: rgba(63,185,80,0.1); color: var(--green); }
+.badge-medium { background: rgba(88,166,255,0.1); color: var(--blue); }
+.badge-high   { background: rgba(210,153,34,0.1); color: var(--yellow); }
+.badge-urgent { background: rgba(248,81,73,0.1); color: var(--red); }
+
+/* Role badges */
+.badge-superadmin  { background: rgba(163,113,247,0.12); color: var(--purple); }
+.badge-back_office { background: rgba(57,210,192,0.12);  color: var(--teal); }
+.badge-front_office { background: rgba(88,166,255,0.12); color: var(--blue); }
+
+/* Clickable row */
+.clickable-row { cursor: pointer; }
+
+/* Pagination */
+.pagination {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 16px; flex-wrap: wrap; gap: 12px;
+}
+.pagination-info { font-size: 0.82rem; color: var(--text-secondary); }
+.pagination-btns { display: flex; gap: 6px; }
+
+/* ==========================================================================
+   7. MODAL SYSTEM
+   ========================================================================== */
+.modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(1,4,9,0.78);
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    width: 100%; max-height: 92vh;
+    display: flex; flex-direction: column;
+    box-shadow: var(--shadow-xl);
+    animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-sm { max-width: 480px; }
+.modal-md { max-width: 600px; }
+.modal-lg { max-width: 860px; }
+
+@keyframes modalSlideIn {
+    from { transform: scale(0.92) translateY(16px); opacity: 0; }
+    to   { transform: scale(1)    translateY(0);    opacity: 1; }
+}
+
+.modal-head {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.modal-head h3 { font-size: 1.15rem; }
+.modal-close {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); font-size: 1.1rem;
+    cursor: pointer; transition: var(--transition);
+}
+.modal-close:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.modal-body {
+    padding: 24px; overflow-y: auto; flex: 1;
+}
+
+.modal-foot {
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 10px;
+}
+
+/* Form styling */
+.form-group { margin-bottom: 16px; }
+.form-group label {
+    display: block; margin-bottom: 6px;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.4px;
+}
+.form-control {
+    width: 100%; background: var(--bg-body);
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 10px 14px; color: var(--text-primary);
+    transition: var(--transition);
+}
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-muted);
+}
+.form-control::placeholder { color: var(--text-tertiary); }
+
+textarea.form-control { resize: vertical; min-height: 80px; }
+select.form-control { cursor: pointer; }
+
+.form-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+
+.form-hint {
+    margin-top: 4px; font-size: 0.75rem; color: var(--text-tertiary);
+}
+
+/* ==========================================================================
+   8. TICKET DETAIL LAYOUT
+   ========================================================================== */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+}
+
+.detail-left { display: flex; flex-direction: column; gap: 16px; }
+
+.detail-right {
+    display: flex; flex-direction: column; gap: 16px;
+    background: var(--bg-body);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    height: fit-content;
+    position: sticky; top: 0;
+}
+
+.detail-section {
+    background: var(--bg-body);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+}
+
+.detail-section-title {
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-secondary);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+}
+.detail-section-title i { color: var(--text-tertiary); }
+
+.detail-desc {
+    font-size: 0.9rem; line-height: 1.6; color: var(--text-primary);
+    white-space: pre-wrap; word-break: break-word;
+}
+
+/* Comments */
+.comments-feed { display: flex; flex-direction: column; gap: 10px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
+
+.comment-bubble {
+    padding: 12px 14px;
+    background: var(--bg-elevated);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: 0.85rem;
+}
+.comment-bubble.internal {
+    border-left-color: var(--yellow);
+    background: rgba(210,153,34,0.05);
+}
+
+.comment-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px; font-size: 0.75rem; color: var(--text-secondary);
+}
+.comment-author { font-weight: 700; color: var(--text-primary); }
+.comment-body { line-height: 1.5; }
+
+.add-comment-form { margin-top: 12px; }
+
+/* History log */
+.history-feed { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding-right: 4px; }
+
+.history-entry {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8rem;
+}
+.history-entry:last-child { border-bottom: none; padding-bottom: 0; }
+.history-who { color: var(--text-secondary); font-size: 0.72rem; margin-bottom: 2px; }
+.history-what { color: var(--text-primary); }
+.history-field { color: var(--primary); font-weight: 600; }
+
+/* Detail metadata list */
+.meta-list { font-size: 0.82rem; display: flex; flex-direction: column; gap: 8px; }
+.meta-list .meta-row { display: flex; justify-content: space-between; }
+.meta-list .meta-key { color: var(--text-secondary); font-weight: 600; }
+.meta-list .meta-val { color: var(--text-primary); text-align: right; }
+
+.detail-divider {
+    border: none; border-top: 1px solid var(--border);
+    margin: 8px 0;
+}
+
+/* ==========================================================================
+   9. TOAST NOTIFICATION SYSTEM
+   ========================================================================== */
+#toast-rack {
+    position: fixed; bottom: 24px; right: 24px;
+    z-index: 600;
+    display: flex; flex-direction: column-reverse; gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    min-width: 320px; max-width: 440px;
+    background: var(--bg-elevated);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 14px 18px;
+    display: flex; align-items: flex-start; gap: 12px;
+    box-shadow: var(--shadow-lg);
+    animation: toastIn 0.35s ease;
+    pointer-events: auto;
+}
+
+@keyframes toastIn  { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(110%); opacity: 0; } }
+
+.toast.success { border-left-color: var(--green); }
+.toast.error   { border-left-color: var(--red); }
+.toast.warning { border-left-color: var(--yellow); }
+.toast.info    { border-left-color: var(--blue); }
+
+.toast-icon { font-size: 1.15rem; margin-top: 1px; flex-shrink: 0; }
+.toast.success .toast-icon { color: var(--green); }
+.toast.error   .toast-icon { color: var(--red); }
+.toast.warning .toast-icon { color: var(--yellow); }
+.toast.info    .toast-icon { color: var(--blue); }
+
+.toast-body { flex: 1; }
+.toast-title { font-weight: 600; font-size: 0.88rem; }
+.toast-msg   { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+
+.toast-dismiss {
+    color: var(--text-tertiary); cursor: pointer; font-size: 0.9rem;
+    padding: 2px; flex-shrink: 0;
+    transition: var(--transition);
+}
+.toast-dismiss:hover { color: var(--text-primary); }
+
+/* ==========================================================================
+   10. GLOBAL LOADER OVERLAY
+   ========================================================================== */
+#loader-overlay {
+    position: fixed; inset: 0;
+    background: rgba(13,17,23,0.65);
+    backdrop-filter: blur(2px);
+    z-index: 700;
+    display: none; align-items: center; justify-content: center;
+}
+
+.loader-spinner {
+    width: 44px; height: 44px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ==========================================================================
+   11. RESPONSIVE BREAKPOINTS
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main-content { margin-left: 0; }
+    .mobile-bar { display: flex; }
+    .main-header { padding-top: 72px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .main-header { padding: 72px 16px 0; }
+    .main-body { padding: 16px 16px 32px; }
+    .controls-bar { padding: 12px; }
+    .search-box { max-width: 100%; }
+    .modal { border-radius: var(--radius-lg); }
+    .login-card { padding: 32px 20px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== GLOBAL LOADER OVERLAY ===== -->
+<div id="loader-overlay"><div class="loader-spinner"></div></div>
+
+<!-- ===== TOAST NOTIFICATION CONTAINER ===== -->
+<div id="toast-rack"></div>
+
+<!-- ===================================================================
+     LOGIN PAGE
+     =================================================================== -->
+<div id="login-page">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="icon-ring"><i class="fa-solid fa-tower-cell"></i></div>
+            <h2>Megafon Tajikistan</h2>
+            <p>Mini CRM — Operator Portal</p>
+        </div>
+        <form id="login-form" autocomplete="on">
+            <div class="form-group">
+                <label for="login-username">Username</label>
+                <input type="text" id="login-username" class="form-control" placeholder="Enter your username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px;">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ===================================================================
+     APPLICATION SHELL
+     =================================================================== -->
+<div id="app-shell">
+
+    <!-- Mobile top bar -->
+    <div class="mobile-bar">
+        <div class="hamburger" id="hamburger-btn"><i class="fa-solid fa-bars"></i></div>
+        <h3>Megafon CRM</h3>
+    </div>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fa-solid fa-tower-cell"></i></div>
+            <h2>Megafon CRM</h2>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-avatar" id="sb-avatar">?</div>
+            <div class="profile-info">
+                <div class="profile-name" id="sb-name">Operator</div>
+                <div class="profile-role" id="sb-role">—</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav" id="sidebar-nav">
+            <!-- Populated by JS based on role -->
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="logout-btn" id="btn-logout">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <header class="main-header">
+            <div class="page-heading">
+                <h1 id="hdr-title">Dashboard</h1>
+                <p id="hdr-subtitle">System overview</p>
+            </div>
+        </header>
+
+        <div class="main-body">
+
+            <!-- ================= DASHBOARD PAGE ================= -->
+            <section id="page-dashboard" class="page">
+                <div class="stats-grid" id="stats-grid">
+                    <!-- Rendered by JS -->
+                </div>
+
+                <h3 style="margin-bottom:14px; font-size:1.05rem;">Recent Tickets</h3>
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticket #</th><th>Subject</th><th>Client</th>
+                                    <th>Priority</th><th>Status</th><th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-tickets-body">
+                                <tr><td colspan="6" class="table-empty"><i class="fa-solid fa-inbox"></i>Loading…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= CLIENTS PAGE ================= -->
+            <section id="page-clients" class="page">
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="clients-search" placeholder="Search name, phone (+992…) or account #">
+                    </div>
+                    <button class="btn btn-primary" id="btn-new-client"><i class="fa-solid fa-user-plus"></i> New Client</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Account #</th><th>Full Name</th><th>Phone</th>
+                                    <th>Email</th><th>Passport</th><th>Created</th><th style="width:120px">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clients-tbody">
+                                <tr><td colspan="7" class="table-empty"><i class="fa-solid fa-users"></i>No clients loaded yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= TICKETS PAGE ================= -->
+            <section id="page-tickets" class="page">
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="tickets-search" placeholder="Search ticket # or client name…">
+                    </div>
+                    <select id="tickets-filter-status" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="new">New</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <select id="tickets-filter-priority" class="filter-select">
+                        <option value="">All Priorities</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                    <button class="btn btn-primary" id="btn-new-ticket"><i class="fa-solid fa-plus"></i> New Ticket</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ticket #</th><th>Subject</th><th>Client</th>
+                                    <th>Category</th><th>Priority</th><th>Status</th>
+                                    <th>Assignee</th><th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-tbody">
+                                <tr><td colspan="8" class="table-empty"><i class="fa-solid fa-ticket"></i>No tickets loaded yet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="pagination">
+                    <span class="pagination-info" id="tickets-pag-info">Page 1</span>
+                    <div class="pagination-btns">
+                        <button class="btn btn-outline btn-sm" id="tickets-prev" disabled><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                        <button class="btn btn-outline btn-sm" id="tickets-next" disabled>Next <i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= USERS PAGE ================= -->
+            <section id="page-users" class="page">
+                <div class="controls-bar" style="justify-content:flex-end;">
+                    <button class="btn btn-primary" id="btn-new-user"><i class="fa-solid fa-user-shield"></i> Register Operator</button>
+                </div>
+
+                <!-- Roles documentation cards -->
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:16px;">
+                    <div class="detail-section">
+                        <div class="detail-section-title" style="color:var(--blue)"><i class="fa-solid fa-headset"></i> Front Office</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
+                            Helpdesk operators. Can search clients, register new clients, create tickets, and leave comments. Cannot modify ticket status or reassign.
+                        </p>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-section-title" style="color:var(--teal)"><i class="fa-solid fa-gears"></i> Back Office</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
+                            Engineers and dispatchers. Full ticket lifecycle control: change status, assign operators, edit clients, delete records, and leave internal notes.
+                        </p>
+                    </div>
+                    <div class="detail-section">
+                        <div class="detail-section-title" style="color:var(--purple)"><i class="fa-solid fa-user-shield"></i> Superadmin</div>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5;">
+                            System administrators. All back-office privileges plus user account registration and management. Only role that can create operator logins.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- .main-body -->
+    </div><!-- .main-content -->
+</div><!-- #app-shell -->
+
+
+<!-- ===================================================================
+     MODAL: CREATE / EDIT CLIENT
+     =================================================================== -->
+<div class="modal-backdrop" id="modal-client">
+    <div class="modal modal-md">
+        <div class="modal-head">
+            <h3 id="modal-client-title">New Client</h3>
+            <span class="modal-close" data-close="modal-client"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+        <form id="form-client">
+            <div class="modal-body">
+                <input type="hidden" id="client-mode" value="create">
+                <input type="hidden" id="client-orig-acct" value="">
+
+                <div class="form-group">
+                    <label for="cl-name">Full Name *</label>
+                    <input type="text" id="cl-name" class="form-control" required minlength="3" maxlength="50" placeholder="Umed Rajabov">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cl-acct">Account Number *</label>
+                        <input type="text" id="cl-acct" class="form-control" required minlength="5" maxlength="20" placeholder="20089914">
+                    </div>
+                    <div class="form-group">
+                        <label for="cl-phone">Phone *</label>
+                        <input type="text" id="cl-phone" class="form-control" required placeholder="+992008991405">
+                        <div class="form-hint">Tajikistan format, min 9 digits</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cl-email">Email</label>
+                    <input type="email" id="cl-email" class="form-control" placeholder="client@mail.com">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cl-passport">Passport Series</label>
+                        <input type="text" id="cl-passport" class="form-control" placeholder="AT1234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="cl-address">Address</label>
+                        <input type="text" id="cl-address" class="form-control" maxlength="200" placeholder="Dushanbe, Rudaki 45">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-outline" data-close="modal-client">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODAL: CREATE TICKET
+     =================================================================== -->
+<div class="modal-backdrop" id="modal-ticket-create">
+    <div class="modal modal-md">
+        <div class="modal-head">
+            <h3>Submit New Ticket</h3>
+            <span class="modal-close" data-close="modal-ticket-create"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+        <form id="form-ticket-create">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="tk-client">Client *</label>
+                    <select id="tk-client" class="form-control" required>
+                        <option value="">— Select client —</option>
+                    </select>
+                    <div class="form-hint">Client must be registered first</div>
+                </div>
+                <div class="form-group">
+                    <label for="tk-title">Issue Title *</label>
+                    <input type="text" id="tk-title" class="form-control" required minlength="3" maxlength="200" placeholder="e.g. No network coverage in Khujand">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tk-category">Category *</label>
+                        <select id="tk-category" class="form-control" required>
+                            <option value="consultation">Consultation</option>
+                            <option value="complaint">Complaint</option>
+                            <option value="request">Request</option>
+                            <option value="technical">Technical</option>
+                            <option value="billing">Billing</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tk-priority">Priority *</label>
+                        <select id="tk-priority" class="form-control" required>
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tk-desc">Description *</label>
+                    <textarea id="tk-desc" class="form-control" required minlength="5" placeholder="Describe the issue in detail…"></textarea>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-outline" data-close="modal-ticket-create">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit Ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODAL: TICKET DETAIL
+     =================================================================== -->
+<div class="modal-backdrop" id="modal-ticket-detail">
+    <div class="modal modal-lg">
+        <div class="modal-head">
+            <div>
+                <h3 id="td-ticket-number">Ticket</h3>
+                <span style="font-size:0.85rem; color:var(--text-secondary);" id="td-title-sub"></span>
+            </div>
+            <span class="modal-close" data-close="modal-ticket-detail"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+
+                <!-- LEFT: description, comments, history -->
+                <div class="detail-left">
+                    <!-- Description -->
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fa-solid fa-align-left"></i> Description</div>
+                        <div class="detail-desc" id="td-desc">—</div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fa-solid fa-comments"></i> Comments</div>
+                        <div class="comments-feed" id="td-comments">
+                            <span style="color:var(--text-secondary); font-size:0.85rem;">No comments yet.</span>
+                        </div>
+                        <form class="add-comment-form" id="form-add-comment">
+                            <div class="form-group" style="margin-bottom:8px;">
+                                <textarea id="td-comment-text" class="form-control" placeholder="Write a comment…" required style="min-height:60px;"></textarea>
+                            </div>
+                            <div style="display:flex; justify-content:flex-end;">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-paper-plane"></i> Post</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- History -->
+                    <div class="detail-section">
+                        <div class="detail-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Audit Trail</div>
+                        <div class="history-feed" id="td-history">
+                            <span style="color:var(--text-secondary); font-size:0.82rem;">No changes recorded.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: metadata + edit controls -->
+                <div class="detail-right">
+                    <form id="form-ticket-update">
+                        <input type="hidden" id="td-active-id" value="">
+
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="td-status" class="form-control td-editable">
+                                <option value="new">New</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="pending">Pending</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority</label>
+                            <select id="td-priority" class="form-control td-editable">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="td-category" class="form-control td-editable">
+                                <option value="complaint">Complaint</option>
+                                <option value="request">Request</option>
+                                <option value="consultation">Consultation</option>
+                                <option value="technical">Technical</option>
+                                <option value="billing">Billing</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Assigned Operator</label>
+                            <select id="td-assignee" class="form-control td-editable">
+                                <option value="">Unassigned</option>
+                            </select>
+                            <input type="number" id="td-assignee-manual" class="form-control td-editable" placeholder="Or type User ID" style="margin-top:6px; font-size:0.8rem; padding:7px 10px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm td-editable" style="width:100%;">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                        </button>
+                    </form>
+
+                    <hr class="detail-divider">
+
+                    <div class="meta-list" id="td-meta">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <button class="btn btn-danger-outline btn-sm" id="td-btn-delete" style="width:100%; display:none;">
+                        <i class="fa-solid fa-trash-can"></i> Delete Ticket
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     MODAL: REGISTER USER
+     =================================================================== -->
+<div class="modal-backdrop" id="modal-user">
+    <div class="modal modal-sm">
+        <div class="modal-head">
+            <h3>Register New Operator</h3>
+            <span class="modal-close" data-close="modal-user"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+        <form id="form-user">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="usr-fullname">Full Name *</label>
+                    <input type="text" id="usr-fullname" class="form-control" required minlength="3" maxlength="50" placeholder="Alisher Karimov">
+                </div>
+                <div class="form-group">
+                    <label for="usr-username">Username *</label>
+                    <input type="text" id="usr-username" class="form-control" required minlength="3" maxlength="50" placeholder="alisher_k">
+                </div>
+                <div class="form-group">
+                    <label for="usr-email">Email *</label>
+                    <input type="email" id="usr-email" class="form-control" required placeholder="alisher@megafon.tj">
+                </div>
+                <div class="form-group">
+                    <label for="usr-role">System Role *</label>
+                    <select id="usr-role" class="form-control" required>
+                        <option value="front_office">Front Office</option>
+                        <option value="back_office">Back Office</option>
+                        <option value="superadmin">Superadmin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="usr-password">Password * (min 8 chars)</label>
+                    <input type="password" id="usr-password" class="form-control" required minlength="8" placeholder="••••••••">
+                </div>
+            </div>
+            <div class="modal-foot">
+                <button type="button" class="btn btn-outline" data-close="modal-user">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Register</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ===================================================================
+     MODAL: CLIENT DETAIL (view client info + their tickets)
+     =================================================================== -->
+<div class="modal-backdrop" id="modal-client-detail">
+    <div class="modal modal-lg">
+        <div class="modal-head">
+            <h3 id="cd-title">Client Details</h3>
+            <span class="modal-close" data-close="modal-client-detail"><i class="fa-solid fa-xmark"></i></span>
+        </div>
+        <div class="modal-body">
+            <div class="meta-list" id="cd-meta" style="margin-bottom:20px;"></div>
+            <h4 style="margin-bottom:12px; font-size:1rem;"><i class="fa-solid fa-ticket" style="margin-right:6px; color:var(--text-secondary);"></i>Client Tickets</h4>
+            <div class="table-wrapper">
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr><th>Ticket #</th><th>Subject</th><th>Status</th><th>Priority</th><th>Created</th></tr></thead>
+                        <tbody id="cd-tickets-body">
+                            <tr><td colspan="5" class="table-empty"><i class="fa-solid fa-ticket"></i>No tickets.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// =====================================================================
+// ===== CONFIGURATION =====
+// =====================================================================
+
+/** Base URL of the FastAPI backend */
+const API = 'http://127.0.0.1:8000';
+
+// =====================================================================
+// ===== APPLICATION STATE =====
+// =====================================================================
+
+/** Holds decoded JWT payload for the logged-in user: { user_id, role } */
+let currentUser = null;
+
+/** Username string saved from the login form (JWT does not contain it) */
+let loggedInUsername = '';
+
+/** Page number for ticket pagination */
+let ticketsPage = 1;
+
+/** How many tickets to load per page */
+const ticketsPageSize = 10;
+
+/** Map of user_id → { id, full_name, role } collected from ticket details, used for the assignee dropdown */
+const knownUsers = new Map();
+
+/** Debounce timer id for search inputs */
+let clientSearchTimer = null;
+let ticketSearchTimer = null;
+
+
+// =====================================================================
+// ===== UTILITY FUNCTIONS =====
+// =====================================================================
+
+/**
+ * Decodes a JWT token's payload without a library.
+ * Returns the parsed JSON object, or null on failure.
+ * @param {string} token - The JWT string
+ */
+function parseJWT(token) {
+    try {
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const json = decodeURIComponent(
+            atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+        );
+        return JSON.parse(json);
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Formats an ISO date string into a short local representation.
+ * Example: "2 Jun 2026, 15:30"
+ * @param {string} iso - ISO date string from the API
+ */
+function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+         + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * Returns a short relative-time string like "2h ago" or "3d ago".
+ * Falls back to fmtDate for older dates.
+ * @param {string} iso - ISO date string
+ */
+function timeAgo(iso) {
+    if (!iso) return '—';
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60)    return 'just now';
+    if (diff < 3600)  return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+    return fmtDate(iso);
+}
+
+/**
+ * Escapes HTML special characters to prevent XSS when inserting user-generated text.
+ * @param {string} str - Raw string
+ */
+function esc(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+/**
+ * Checks if the current user's role matches one of the allowed roles.
+ * @param  {...string} roles - Role strings to check
+ */
+function hasRole(...roles) {
+    return currentUser && roles.includes(currentUser.role);
+}
+
+
+// =====================================================================
+// ===== UI HELPERS — LOADER, TOAST, MODAL =====
+// =====================================================================
+
+/**
+ * Shows the full-screen loading spinner overlay.
+ */
+function showLoader() {
+    document.getElementById('loader-overlay').style.display = 'flex';
+}
+
+/**
+ * Hides the full-screen loading spinner overlay.
+ */
+function hideLoader() {
+    document.getElementById('loader-overlay').style.display = 'none';
+}
+
+/**
+ * Displays a toast notification at the bottom-right corner.
+ * Auto-dismisses after 4 seconds.
+ * @param {string} title   - Bold heading text
+ * @param {string} message - Description text
+ * @param {'success'|'error'|'warning'|'info'} type - Visual variant
+ */
+function toast(title, message, type = 'info') {
+    const rack = document.getElementById('toast-rack');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+
+    // Pick the right icon for each type
+    const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', warning: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+
+    el.innerHTML = `
+        <div class="toast-icon"><i class="fa-solid ${icons[type] || icons.info}"></i></div>
+        <div class="toast-body">
+            <div class="toast-title">${esc(title)}</div>
+            <div class="toast-msg">${esc(message)}</div>
+        </div>
+        <span class="toast-dismiss"><i class="fa-solid fa-xmark"></i></span>
+    `;
+
+    // Allow manual dismiss by clicking the X
+    el.querySelector('.toast-dismiss').onclick = () => dismissToast(el);
+    rack.appendChild(el);
+
+    // Auto-dismiss after 4 seconds
+    setTimeout(() => dismissToast(el), 4000);
+}
+
+/**
+ * Animates a toast out and removes it from the DOM.
+ * @param {HTMLElement} el - The toast element
+ */
+function dismissToast(el) {
+    if (!el || !el.parentNode) return;
+    el.style.animation = 'toastOut 0.3s ease forwards';
+    el.addEventListener('animationend', () => el.remove());
+}
+
+/**
+ * Opens a modal dialog by ID.
+ * @param {string} id - The modal-backdrop element's ID
+ */
+function openModal(id) {
+    document.getElementById(id).style.display = 'flex';
+}
+
+/**
+ * Closes a modal dialog by ID.
+ * @param {string} id - The modal-backdrop element's ID
+ */
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+// Attach close handlers to all elements with data-close attribute
+document.addEventListener('click', (e) => {
+    const closeBtn = e.target.closest('[data-close]');
+    if (closeBtn) closeModal(closeBtn.dataset.close);
+});
+
+// Close modal when clicking backdrop (outside the .modal box)
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('mousedown', (e) => {
+        if (e.target === backdrop) closeModal(backdrop.id);
+    });
+});
+
+
+// =====================================================================
+// ===== API HELPER — AUTHENTICATED FETCH WITH AUTO-REFRESH =====
+// =====================================================================
+
+/**
+ * Tries to refresh the JWT access token using the stored refresh token.
+ * Returns true on success, false on failure.
+ */
+// POST /api/auth/refresh - Refresh expired access token
+async function tryRefreshToken() {
+    const rt = localStorage.getItem('refresh_token');
+    if (!rt) return false;
+    try {
+        const res = await fetch(`${API}/api/auth/refresh?refresh_token=${encodeURIComponent(rt)}`, { method: 'POST' });
+        if (!res.ok) return false;
+        const data = await res.json();
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+        currentUser = parseJWT(data.access_token);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Wrapper around fetch() that automatically:
+ *   1. Attaches the JWT Authorization header
+ *   2. Shows/hides the global loader
+ *   3. Retries once on 401 by refreshing the token
+ *   4. On permanent 401, logs the user out
+ *   5. On 403, shows an "Access denied" toast
+ *
+ * @param {string} url     - Full API URL
+ * @param {object} options - Standard fetch options (method, body, etc.)
+ * @returns {Promise<Response>} The fetch Response object
+ */
+async function apiFetch(url, options = {}) {
+    let token = localStorage.getItem('access_token');
+    if (!token) { logout(); throw new Error('No token'); }
+
+    // Merge headers — always send JSON
+    options.headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers,
+    };
+
+    showLoader();
+    try {
+        let res = await fetch(url, options);
+
+        // If 401 Unauthorized → attempt one token refresh, then retry
+        if (res.status === 401) {
+            const refreshed = await tryRefreshToken();
+            if (refreshed) {
+                options.headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
+                res = await fetch(url, options);
+            } else {
+                hideLoader();
+                logout();
+                throw new Error('Session expired');
+            }
+        }
+
+        // If 403 Forbidden → show access denied toast
+        if (res.status === 403) {
+            const err = await res.json().catch(() => ({}));
+            toast('Access Denied', err.detail || 'You lack permission for this action.', 'warning');
+        }
+
+        hideLoader();
+        return res;
+    } catch (err) {
+        hideLoader();
+        if (err.message !== 'Session expired') {
+            toast('Connection Error', 'Could not reach the server. Is the backend running?', 'error');
+        }
+        throw err;
+    }
+}
+
+
+// =====================================================================
+// ===== AUTH SECTION =====
+// =====================================================================
+
+/**
+ * Clears all stored credentials and redirects to the login screen.
+ */
+function logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('username');
+    currentUser = null;
+    loggedInUsername = '';
+    document.getElementById('app-shell').style.display = 'none';
+    document.getElementById('login-page').style.display = 'flex';
+}
+
+/**
+ * Handles login form submission.
+ * Sends credentials, saves tokens, then boots the main app.
+ */
+// POST /api/auth/login - Authenticate user and receive JWT tokens
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    showLoader();
+    try {
+        const res = await fetch(`${API}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+        hideLoader();
+
+        if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            localStorage.setItem('username', username);
+            loggedInUsername = username;
+            currentUser = parseJWT(data.access_token);
+            toast('Welcome!', `Logged in as ${username}`, 'success');
+            bootApp();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Login Failed', err.detail || 'Invalid credentials', 'error');
+        }
+    } catch {
+        hideLoader();
+        toast('Connection Error', 'Cannot reach the server at ' + API, 'error');
+    }
+});
+
+/**
+ * Handles new user registration (admin only).
+ */
+// POST /api/auth/register - Create a new operator account (superadmin only)
+document.getElementById('form-user').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+        full_name: document.getElementById('usr-fullname').value.trim(),
+        username:  document.getElementById('usr-username').value.trim(),
+        email:     document.getElementById('usr-email').value.trim(),
+        role:      document.getElementById('usr-role').value,
+        password:  document.getElementById('usr-password').value,
+    };
+
+    try {
+        const res = await apiFetch(`${API}/api/auth/register`, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+            toast('User Registered', `Operator "${payload.username}" created successfully.`, 'success');
+            closeModal('modal-user');
+            e.target.reset();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Registration Failed', err.detail || 'Could not create user', 'error');
+        }
+    } catch { /* handled by apiFetch */ }
+});
+
+
+// =====================================================================
+// ===== NAVIGATION SECTION =====
+// =====================================================================
+
+/**
+ * Definition of all navigable pages.
+ * Each entry specifies the nav label, icon, page element ID, header text,
+ * and which roles can see it.
+ */
+const NAV_ITEMS = [
+    { id: 'dashboard', icon: 'fa-chart-pie',     label: 'Dashboard',  roles: ['superadmin', 'back_office'],                pageId: 'page-dashboard', title: 'Dashboard',       subtitle: 'System overview & ticket statistics' },
+    { id: 'clients',   icon: 'fa-users',         label: 'Clients',    roles: ['superadmin', 'back_office', 'front_office'], pageId: 'page-clients',   title: 'Client Directory', subtitle: 'Search, create and manage clients' },
+    { id: 'tickets',   icon: 'fa-ticket',        label: 'Tickets',    roles: ['superadmin', 'back_office', 'front_office'], pageId: 'page-tickets',   title: 'Service Tickets',  subtitle: 'View and manage support tickets' },
+    { id: 'users',     icon: 'fa-user-shield',   label: 'Users',      roles: ['superadmin'],                                pageId: 'page-users',     title: 'User Management',  subtitle: 'Register and manage operator accounts' },
+];
+
+/**
+ * Builds the sidebar navigation links based on the current user's role.
+ * Hides pages the user doesn't have access to.
+ */
+function buildNavigation() {
+    const nav = document.getElementById('sidebar-nav');
+    nav.innerHTML = '';
+
+    NAV_ITEMS.forEach(item => {
+        // Only show this nav link if the user's role is in the allowed list
+        if (!hasRole(...item.roles)) return;
+
+        const div = document.createElement('div');
+        div.className = 'nav-link';
+        div.dataset.page = item.id;
+        div.innerHTML = `<i class="fa-solid ${item.icon}"></i> ${item.label}`;
+        div.addEventListener('click', () => navigateTo(item.id));
+        nav.appendChild(div);
+    });
+}
+
+/**
+ * Switches the active page and highlights the correct nav link.
+ * Also fetches fresh data for the target page.
+ * @param {string} pageId - One of: 'dashboard', 'clients', 'tickets', 'users'
+ */
+function navigateTo(pageId) {
+    const item = NAV_ITEMS.find(n => n.id === pageId);
+    if (!item) return;
+
+    // Update header text
+    document.getElementById('hdr-title').textContent = item.title;
+    document.getElementById('hdr-subtitle').textContent = item.subtitle;
+
+    // Swap active page section
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const pageEl = document.getElementById(item.pageId);
+    if (pageEl) pageEl.classList.add('active');
+
+    // Swap active nav link
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const activeLink = document.querySelector(`.nav-link[data-page="${pageId}"]`);
+    if (activeLink) activeLink.classList.add('active');
+
+    // Close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').style.display = 'none';
+
+    // Load data for the page
+    if (pageId === 'dashboard') loadDashboard();
+    if (pageId === 'clients')   loadClients();
+    if (pageId === 'tickets')   { ticketsPage = 1; loadTickets(); }
+
+    // Configure role-specific UI elements on the tickets page
+    configureTicketsPageForRole();
+}
+
+/**
+ * Configures button visibility on the tickets page based on the user's role.
+ * front_office can create tickets; only back_office/superadmin can edit/delete.
+ */
+function configureTicketsPageForRole() {
+    // Show "New Ticket" button for front_office, back_office, superadmin
+    const btnNewTicket = document.getElementById('btn-new-ticket');
+    if (btnNewTicket) btnNewTicket.style.display = hasRole('front_office', 'back_office', 'superadmin') ? '' : 'none';
+}
+
+// Mobile hamburger toggle
+document.getElementById('hamburger-btn').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    const overlay = document.getElementById('sidebar-overlay');
+    overlay.style.display = overlay.style.display === 'block' ? 'none' : 'block';
+});
+
+document.getElementById('sidebar-overlay').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').style.display = 'none';
+});
+
+// Logout button
+document.getElementById('btn-logout').addEventListener('click', logout);
+
+
+// =====================================================================
+// ===== DASHBOARD SECTION =====
+// =====================================================================
+
+/**
+ * Fetches dashboard statistics and recent tickets, then renders them.
+ */
+async function loadDashboard() {
+    await Promise.all([loadDashboardStats(), loadRecentTickets()]);
+}
+
+/**
+ * Fetches aggregated ticket status counts and renders stat cards.
+ */
+// GET /api/tickets/dashboard/stats - Get ticket count breakdown by status
+async function loadDashboardStats() {
+    try {
+        const res = await apiFetch(`${API}/api/tickets/dashboard/stats`);
+        if (!res.ok) return;
+        const s = await res.json();
+        renderDashboardStats(s);
+    } catch { /* handled by apiFetch */ }
+}
+
+/**
+ * Renders the dashboard stats cards into the grid.
+ * @param {object} s - Stats object with total, new_count, accepted, in_progress, etc.
+ */
+function renderDashboardStats(s) {
+    const grid = document.getElementById('stats-grid');
+    grid.innerHTML = '';
+
+    const cards = [
+        { label: 'Total',       value: s.total,       icon: 'fa-layer-group',  color: 'purple' },
+        { label: 'New',         value: s.new_count,   icon: 'fa-bolt',         color: 'blue' },
+        { label: 'Accepted',    value: s.accepted,    icon: 'fa-check',        color: 'teal' },
+        { label: 'In Progress', value: s.in_progress, icon: 'fa-spinner',      color: 'yellow' },
+        { label: 'Pending',     value: s.pending,      icon: 'fa-hourglass-half', color: 'orange' },
+        { label: 'Resolved',    value: s.resolved,    icon: 'fa-circle-check', color: 'green' },
+        { label: 'Rejected',    value: s.rejected,    icon: 'fa-circle-xmark', color: 'red' },
+        { label: 'Cancelled',   value: s.cancelled,   icon: 'fa-ban',          color: 'gray' },
+    ];
+
+    cards.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'stat-card';
+        div.innerHTML = `
+            <div class="icon-box ${c.color}"><i class="fa-solid ${c.icon}"></i></div>
+            <div>
+                <div class="stat-label">${c.label}</div>
+                <div class="stat-value">${c.value ?? 0}</div>
+            </div>
+        `;
+        grid.appendChild(div);
+    });
+}
+
+/**
+ * Loads the 5 most recent tickets for the dashboard table.
+ */
+// POST /api/tickets/search - Fetch recent tickets for dashboard display
+async function loadRecentTickets() {
+    try {
+        const res = await apiFetch(`${API}/api/tickets/search?page=1&size=5`, {
+            method: 'POST',
+            body: JSON.stringify({}),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        renderDashboardTickets(data.items || []);
+    } catch { /* handled by apiFetch */ }
+}
+
+/**
+ * Renders a short table of recent tickets on the dashboard.
+ * @param {Array} items - Array of TicketListItem objects
+ */
+function renderDashboardTickets(items) {
+    const tbody = document.getElementById('dash-tickets-body');
+    if (!items.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="table-empty"><i class="fa-solid fa-inbox"></i>No tickets yet.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = items.map(t => `
+        <tr class="clickable-row" onclick="openTicketDetail(${t.id})">
+            <td><strong style="color:var(--blue);">${esc(t.ticket_number)}</strong></td>
+            <td>${esc(t.title)}</td>
+            <td>${esc(t.client_full_name)}</td>
+            <td><span class="badge badge-${t.priority}">${t.priority}</span></td>
+            <td><span class="badge badge-${t.status}">${t.status.replace('_', ' ')}</span></td>
+            <td style="color:var(--text-secondary); font-size:0.8rem;">${timeAgo(t.created_at)}</td>
+        </tr>
+    `).join('');
+}
+
+
+// =====================================================================
+// ===== CLIENTS SECTION =====
+// =====================================================================
+
+/**
+ * Fetches clients from the API.
+ * If a search query is provided, passes it as ?q= parameter.
+ * @param {string} query - Optional search string
+ */
+// GET /api/clients/search?q={query} - Search clients by name, phone, or account #
+async function loadClients(query = '') {
+    try {
+        const url = query.trim()
+            ? `${API}/api/clients/search?q=${encodeURIComponent(query.trim())}`
+            : `${API}/api/clients/search`;
+        const res = await apiFetch(url);
+        if (!res.ok) return;
+        const clients = await res.json();
+        renderClientsTable(clients);
+        populateTicketClientDropdown(clients);
+    } catch { /* handled by apiFetch */ }
+}
+
+/**
+ * Renders the clients table body.
+ * @param {Array} clients - Array of ClientResponse objects
+ */
+function renderClientsTable(clients) {
+    const tbody = document.getElementById('clients-tbody');
+    if (!clients.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty"><i class="fa-solid fa-user-slash"></i>No clients found.</td></tr>`;
+        return;
+    }
+
+    const canEdit = hasRole('superadmin', 'back_office');
+
+    tbody.innerHTML = clients.map(c => `
+        <tr>
+            <td><strong>${esc(c.account_number)}</strong></td>
+            <td><a href="#" onclick="openClientDetail('${esc(c.account_number)}'); return false;">${esc(c.full_name)}</a></td>
+            <td>${esc(c.phone)}</td>
+            <td style="color:var(--text-secondary);">${c.email ? esc(c.email) : '—'}</td>
+            <td style="color:var(--text-secondary);">${c.passport_series ? esc(c.passport_series) : '—'}</td>
+            <td style="font-size:0.8rem; color:var(--text-secondary);">${fmtDate(c.created_at)}</td>
+            <td>
+                <div class="btn-group">
+                    ${canEdit ? `
+                        <button class="btn btn-outline btn-xs" onclick="editClientOpen('${esc(c.account_number)}')"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-danger-outline btn-xs" onclick="deleteClient('${esc(c.account_number)}')"><i class="fa-solid fa-trash"></i></button>
+                    ` : `
+                        <button class="btn btn-outline btn-xs" onclick="openClientDetail('${esc(c.account_number)}')"><i class="fa-solid fa-eye"></i></button>
+                    `}
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+/**
+ * Fills the client dropdown in the "Create Ticket" modal.
+ * @param {Array} clients - Array of ClientResponse objects
+ */
+function populateTicketClientDropdown(clients) {
+    const sel = document.getElementById('tk-client');
+    sel.innerHTML = '<option value="">— Select client —</option>';
+    clients.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.full_name} (${c.account_number})`;
+        sel.appendChild(opt);
+    });
+}
+
+// Client search input with debouncing
+document.getElementById('clients-search').addEventListener('input', (e) => {
+    clearTimeout(clientSearchTimer);
+    const q = e.target.value;
+    // Debounce 400ms; allow immediate fetch for empty input or when query is digits
+    clientSearchTimer = setTimeout(() => {
+        if (q.length === 0 || q.length >= 3 || /^\+?\d+$/.test(q)) {
+            loadClients(q);
+        }
+    }, 400);
+});
+
+// Open client create modal
+document.getElementById('btn-new-client').addEventListener('click', () => {
+    document.getElementById('form-client').reset();
+    document.getElementById('client-mode').value = 'create';
+    document.getElementById('client-orig-acct').value = '';
+    document.getElementById('modal-client-title').textContent = 'New Client Registration';
+    document.getElementById('cl-acct').removeAttribute('readonly');
+    openModal('modal-client');
+});
+
+/**
+ * Opens the client form in edit mode, pre-filled with existing data.
+ * @param {string} acct - The client's account number
+ */
+// GET /api/clients/{account_number} - Get client details for editing
+async function editClientOpen(acct) {
+    try {
+        const res = await apiFetch(`${API}/api/clients/${acct}`);
+        if (!res.ok) return;
+        const c = await res.json();
+
+        document.getElementById('modal-client-title').textContent = 'Edit Client';
+        document.getElementById('client-mode').value = 'edit';
+        document.getElementById('client-orig-acct').value = c.account_number;
+        document.getElementById('cl-name').value = c.full_name;
+        document.getElementById('cl-acct').value = c.account_number;
+        document.getElementById('cl-phone').value = c.phone;
+        document.getElementById('cl-email').value = c.email || '';
+        document.getElementById('cl-passport').value = c.passport_series || '';
+        document.getElementById('cl-address').value = c.address || '';
+
+        openModal('modal-client');
+    } catch { /* handled by apiFetch */ }
+}
+
+/**
+ * Handles client form submission for both create and edit modes.
+ */
+document.getElementById('form-client').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const mode = document.getElementById('client-mode').value;
+    const origAcct = document.getElementById('client-orig-acct').value;
+
+    const payload = {
+        account_number: document.getElementById('cl-acct').value.trim(),
+        full_name:      document.getElementById('cl-name').value.trim(),
+        phone:          document.getElementById('cl-phone').value.trim(),
+        email:          document.getElementById('cl-email').value.trim() || null,
+        address:        document.getElementById('cl-address').value.trim() || null,
+        passport_series: document.getElementById('cl-passport').value.trim() || null,
+    };
+
+    try {
+        let res;
+        if (mode === 'create') {
+            // POST /api/clients/ - Create a new client record
+            res = await apiFetch(`${API}/api/clients/`, { method: 'POST', body: JSON.stringify(payload) });
+        } else {
+            // PUT /api/clients/{account_number} - Update an existing client
+            res = await apiFetch(`${API}/api/clients/${origAcct}`, { method: 'PUT', body: JSON.stringify(payload) });
+        }
+
+        if (res.ok) {
+            toast('Success', `Client ${mode === 'create' ? 'registered' : 'updated'} successfully.`, 'success');
+            closeModal('modal-client');
+            loadClients();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Error', err.detail || 'Failed to save client', 'error');
+        }
+    } catch { /* handled by apiFetch */ }
+});
+
+/**
+ * Deletes a client by account number after confirmation.
+ * @param {string} acct - Client account number
+ */
+// DELETE /api/clients/{account_number} - Remove client and their tickets
+async function deleteClient(acct) {
+    if (!confirm(`Delete client ${acct}? This also deletes all their tickets.`)) return;
+    try {
+        const res = await apiFetch(`${API}/api/clients/${acct}`, { method: 'DELETE' });
+        if (res.ok) {
+            toast('Deleted', `Client ${acct} removed.`, 'success');
+            loadClients();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Error', err.detail || 'Failed to delete client', 'error');
+        }
+    } catch { /* handled by apiFetch */ }
+}
+
+/**
+ * Opens a detail modal for a specific client, showing their info and tickets.
+ * @param {string} acct - Client account number
+ */
+// GET /api/clients/{account_number} - Get full client details
+async function openClientDetail(acct) {
+    try {
+        const res = await apiFetch(`${API}/api/clients/${acct}`);
+        if (!res.ok) return;
+        const c = await res.json();
+
+        document.getElementById('cd-title').textContent = c.full_name;
+        document.getElementById('cd-meta').innerHTML = `
+            <div class="meta-row"><span class="meta-key">Account #</span><span class="meta-val">${esc(c.account_number)}</span></div>
+            <div class="meta-row"><span class="meta-key">Phone</span><span class="meta-val">${esc(c.phone)}</span></div>
+            <div class="meta-row"><span class="meta-key">Email</span><span class="meta-val">${c.email ? esc(c.email) : '—'}</span></div>
+            <div class="meta-row"><span class="meta-key">Passport</span><span class="meta-val">${c.passport_series ? esc(c.passport_series) : '—'}</span></div>
+            <div class="meta-row"><span class="meta-key">Address</span><span class="meta-val">${c.address ? esc(c.address) : '—'}</span></div>
+            <div class="meta-row"><span class="meta-key">Registered</span><span class="meta-val">${fmtDate(c.created_at)}</span></div>
+        `;
+
+        // Search for this client's tickets by name
+        // POST /api/tickets/search - Find tickets belonging to this client
+        const tRes = await apiFetch(`${API}/api/tickets/search?page=1&size=50`, {
+            method: 'POST',
+            body: JSON.stringify({ search_query: c.full_name }),
+        });
+        const tData = tRes.ok ? await tRes.json() : { items: [] };
+        const tbody = document.getElementById('cd-tickets-body');
+
+        if (!tData.items || !tData.items.length) {
+            tbody.innerHTML = `<tr><td colspan="5" class="table-empty"><i class="fa-solid fa-ticket"></i>No tickets found.</td></tr>`;
+        } else {
+            tbody.innerHTML = tData.items.map(t => `
+                <tr class="clickable-row" onclick="closeModal('modal-client-detail'); openTicketDetail(${t.id});">
+                    <td><strong style="color:var(--blue);">${esc(t.ticket_number)}</strong></td>
+                    <td>${esc(t.title)}</td>
+                    <td><span class="badge badge-${t.status}">${t.status.replace('_',' ')}</span></td>
+                    <td><span class="badge badge-${t.priority}">${t.priority}</span></td>
+                    <td style="font-size:0.8rem; color:var(--text-secondary);">${fmtDate(t.created_at)}</td>
+                </tr>
+            `).join('');
+        }
+
+        openModal('modal-client-detail');
+    } catch { /* handled by apiFetch */ }
+}
+
+
+// =====================================================================
+// ===== TICKETS SECTION =====
+// =====================================================================
+
+/**
+ * Fetches a filtered, paginated list of tickets and renders the table.
+ */
+// POST /api/tickets/search?page=N&size=M - Search and filter tickets
+async function loadTickets() {
+    const searchQuery   = document.getElementById('tickets-search').value.trim();
+    const statusFilter  = document.getElementById('tickets-filter-status').value;
+    const priorityFilter = document.getElementById('tickets-filter-priority').value;
+
+    const body = {};
+    if (statusFilter)   body.status = statusFilter;
+    if (priorityFilter) body.priority = priorityFilter;
+    if (searchQuery)    body.search_query = searchQuery;
+
+    try {
+        const res = await apiFetch(`${API}/api/tickets/search?page=${ticketsPage}&size=${ticketsPageSize}`, {
+            method: 'POST',
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Backend returns "total" when unfiltered, "total_count" when filtered — handle both
+        const totalItems = data.total_count ?? data.total ?? 0;
+        renderTicketsTable(data.items || []);
+        updateTicketsPagination(totalItems);
+    } catch { /* handled by apiFetch */ }
+}
+
+/**
+ * Renders ticket rows into the main tickets table.
+ * @param {Array} items - Array of TicketListItem objects
+ */
+function renderTicketsTable(items) {
+    const tbody = document.getElementById('tickets-tbody');
+    if (!items.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="table-empty"><i class="fa-solid fa-ticket"></i>No tickets found.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = items.map(t => `
+        <tr class="clickable-row" onclick="openTicketDetail(${t.id})">
+            <td><strong style="color:var(--blue);">${esc(t.ticket_number)}</strong></td>
+            <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(t.title)}</td>
+            <td>${esc(t.client_full_name)}</td>
+            <td><span class="badge" style="background:rgba(255,255,255,0.04); color:var(--text-secondary);">${t.category}</span></td>
+            <td><span class="badge badge-${t.priority}">${t.priority}</span></td>
+            <td><span class="badge badge-${t.status}">${t.status.replace('_',' ')}</span></td>
+            <td style="font-size:0.85rem;">${t.assigned_to_name ? esc(t.assigned_to_name) : '<span style="color:var(--text-tertiary)">—</span>'}</td>
+            <td style="font-size:0.8rem; color:var(--text-secondary);">${timeAgo(t.created_at)}</td>
+        </tr>
+    `).join('');
+}
+
+/**
+ * Updates the pagination controls based on total ticket count.
+ * @param {number} totalItems - Total number of matching tickets
+ */
+function updateTicketsPagination(totalItems) {
+    const maxPage = Math.max(1, Math.ceil(totalItems / ticketsPageSize));
+    document.getElementById('tickets-pag-info').textContent = `Page ${ticketsPage} of ${maxPage} (${totalItems} tickets)`;
+    document.getElementById('tickets-prev').disabled = ticketsPage <= 1;
+    document.getElementById('tickets-next').disabled = ticketsPage >= maxPage;
+}
+
+// Ticket search input with debounce
+document.getElementById('tickets-search').addEventListener('input', () => {
+    clearTimeout(ticketSearchTimer);
+    ticketSearchTimer = setTimeout(() => { ticketsPage = 1; loadTickets(); }, 400);
+});
+
+// Ticket filter dropdowns
+document.getElementById('tickets-filter-status').addEventListener('change', () => { ticketsPage = 1; loadTickets(); });
+document.getElementById('tickets-filter-priority').addEventListener('change', () => { ticketsPage = 1; loadTickets(); });
+
+// Pagination buttons
+document.getElementById('tickets-prev').addEventListener('click', () => { if (ticketsPage > 1) { ticketsPage--; loadTickets(); } });
+document.getElementById('tickets-next').addEventListener('click', () => { ticketsPage++; loadTickets(); });
+
+// Open ticket create modal
+document.getElementById('btn-new-ticket').addEventListener('click', () => {
+    document.getElementById('form-ticket-create').reset();
+    // Ensure client dropdown is fresh
+    loadClients();
+    openModal('modal-ticket-create');
+});
+
+/**
+ * Handles new ticket form submission.
+ */
+// POST /api/tickets/ - Create a new support ticket
+document.getElementById('form-ticket-create').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+        client_id:   parseInt(document.getElementById('tk-client').value),
+        title:       document.getElementById('tk-title').value.trim(),
+        category:    document.getElementById('tk-category').value,
+        priority:    document.getElementById('tk-priority').value,
+        description: document.getElementById('tk-desc').value.trim(),
+    };
+
+    try {
+        const res = await apiFetch(`${API}/api/tickets/`, { method: 'POST', body: JSON.stringify(payload) });
+        if (res.ok) {
+            toast('Ticket Created', 'New support ticket submitted.', 'success');
+            closeModal('modal-ticket-create');
+            e.target.reset();
+            loadTickets();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Error', err.detail || 'Failed to create ticket', 'error');
+        }
+    } catch { /* handled by apiFetch */ }
+});
+
+/**
+ * Opens the ticket detail modal, populated with full ticket data.
+ * Configures edit controls based on the user's role.
+ * @param {number} ticketId - Ticket primary key
+ */
+// GET /api/tickets/{ticket_id} - Get full ticket details with comments and history
+async function openTicketDetail(ticketId) {
+    try {
+        const res = await apiFetch(`${API}/api/tickets/${ticketId}`);
+        if (!res.ok) return;
+        const t = await res.json();
+
+        // Populate header
+        document.getElementById('td-ticket-number').textContent = t.ticket_number;
+        document.getElementById('td-title-sub').textContent = t.title;
+        document.getElementById('td-desc').textContent = t.description;
+        document.getElementById('td-active-id').value = t.id;
+
+        // Populate sidebar form values
+        document.getElementById('td-status').value = t.status;
+        document.getElementById('td-priority').value = t.priority;
+        document.getElementById('td-category').value = t.category;
+
+        // Collect known users from ticket data for the assignee dropdown
+        if (t.created_by) knownUsers.set(t.created_by.id, t.created_by);
+        if (t.assigned_to) knownUsers.set(t.assigned_to.id, t.assigned_to);
+        (t.comments || []).forEach(c => { if (c.user) knownUsers.set(c.user.id, c.user); });
+        (t.history || []).forEach(h => { if (h.user) knownUsers.set(h.user.id, h.user); });
+
+        rebuildAssigneeDropdown(t.assigned_to ? t.assigned_to.id : null);
+
+        // Metadata
+        document.getElementById('td-meta').innerHTML = `
+            <div class="meta-row"><span class="meta-key">Client</span><span class="meta-val">${esc(t.client.full_name)}</span></div>
+            <div class="meta-row"><span class="meta-key">Account #</span><span class="meta-val">${esc(t.client.account_number)}</span></div>
+            <div class="meta-row"><span class="meta-key">Phone</span><span class="meta-val">${esc(t.client.phone)}</span></div>
+            <hr class="detail-divider">
+            <div class="meta-row"><span class="meta-key">Created by</span><span class="meta-val">${esc(t.created_by.full_name)} <span class="badge badge-${t.created_by.role}" style="margin-left:4px">${t.created_by.role}</span></span></div>
+            <div class="meta-row"><span class="meta-key">Created</span><span class="meta-val">${fmtDate(t.created_at)}</span></div>
+            <div class="meta-row"><span class="meta-key">Updated</span><span class="meta-val">${fmtDate(t.updated_at)}</span></div>
+        `;
+
+        // Comments
+        renderTicketComments(t.comments || []);
+
+        // History
+        renderTicketHistory(t.history || []);
+
+        // Role-based controls:
+        // front_office → can only post comments, cannot change status/priority/assignee/delete
+        // back_office / superadmin → full edit
+        const canEdit = hasRole('superadmin', 'back_office');
+        document.querySelectorAll('.td-editable').forEach(el => {
+            if (canEdit) {
+                el.removeAttribute('disabled');
+                el.style.display = '';
+            } else {
+                // For selects, disable them; for the save button, hide it
+                if (el.tagName === 'BUTTON') {
+                    el.style.display = 'none';
+                } else {
+                    el.setAttribute('disabled', 'true');
+                }
+            }
+        });
+
+        // Delete button: only back_office and superadmin
+        const deleteBtn = document.getElementById('td-btn-delete');
+        if (hasRole('superadmin', 'back_office')) {
+            deleteBtn.style.display = '';
+            deleteBtn.onclick = () => deleteTicket(t.id);
+        } else {
+            deleteBtn.style.display = 'none';
+        }
+
+        openModal('modal-ticket-detail');
+    } catch { /* handled by apiFetch */ }
+}
+
+/**
+ * Rebuilds the assignee dropdown from the knownUsers Map.
+ * @param {number|null} selectedId - Currently assigned user's ID
+ */
+function rebuildAssigneeDropdown(selectedId) {
+    const sel = document.getElementById('td-assignee');
+    sel.innerHTML = '<option value="">Unassigned</option>';
+    knownUsers.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = `${u.full_name} (${u.role})`;
+        if (u.id === selectedId) opt.selected = true;
+        sel.appendChild(opt);
+    });
+    document.getElementById('td-assignee-manual').value = selectedId || '';
+}
+
+// Sync assignee dropdown ↔ manual ID input
+document.getElementById('td-assignee').addEventListener('change', (e) => {
+    document.getElementById('td-assignee-manual').value = e.target.value;
+});
+document.getElementById('td-assignee-manual').addEventListener('input', (e) => {
+    const v = parseInt(e.target.value);
+    document.getElementById('td-assignee').value = v || '';
+});
+
+/**
+ * Renders comment bubbles inside the ticket detail modal.
+ * @param {Array} comments - Array of CommentResponse objects
+ */
+function renderTicketComments(comments) {
+    const container = document.getElementById('td-comments');
+    if (!comments.length) {
+        container.innerHTML = '<span style="color:var(--text-secondary); font-size:0.85rem;">No comments yet.</span>';
+        return;
+    }
+    container.innerHTML = comments.map(c => `
+        <div class="comment-bubble ${c.is_internal ? 'internal' : ''}">
+            <div class="comment-header">
+                <span><span class="comment-author">${esc(c.user.full_name)}</span> <span class="badge badge-${c.user.role}" style="font-size:0.6rem;">${c.user.role}</span>
+                ${c.is_internal ? ' <i class="fa-solid fa-lock" title="Internal note" style="color:var(--yellow);margin-left:4px;font-size:0.7rem;"></i>' : ''}</span>
+                <span>${timeAgo(c.created_at)}</span>
+            </div>
+            <div class="comment-body">${esc(c.text)}</div>
+        </div>
+    `).join('');
+    container.scrollTop = container.scrollHeight;
+}
+
+/**
+ * Renders audit history entries inside the ticket detail modal.
+ * @param {Array} history - Array of HistoryResponse objects
+ */
+function renderTicketHistory(history) {
+    const container = document.getElementById('td-history');
+    if (!history.length) {
+        container.innerHTML = '<span style="color:var(--text-secondary); font-size:0.82rem;">No changes recorded.</span>';
+        return;
+    }
+    container.innerHTML = history.map(h => `
+        <div class="history-entry">
+            <div class="history-who"><strong>${esc(h.user.full_name)}</strong> — ${timeAgo(h.created_at)}</div>
+            <div class="history-what">Changed <span class="history-field">${esc(h.field_changed)}</span>: <em>${esc(h.old_value || 'none')}</em> → <em>${esc(h.new_value || 'none')}</em></div>
+        </div>
+    `).join('');
+    container.scrollTop = container.scrollHeight;
+}
+
+/**
+ * Handles the "Update Metadata" form on the ticket detail sidebar.
+ * Sends status, priority, category, and assigned_to_id changes.
+ */
+// PUT /api/tickets/{ticket_id} - Update ticket metadata (status, priority, category, assignee)
+document.getElementById('form-ticket-update').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ticketId = document.getElementById('td-active-id').value;
+    if (!ticketId) return;
+
+    const manualAssignee = document.getElementById('td-assignee-manual').value;
+
+    const payload = {
+        status:        document.getElementById('td-status').value,
+        priority:      document.getElementById('td-priority').value,
+        category:      document.getElementById('td-category').value,
+        assigned_to_id: manualAssignee ? parseInt(manualAssignee) : null,
+    };
+
+    try {
+        const res = await apiFetch(`${API}/api/tickets/${ticketId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+            toast('Updated', 'Ticket metadata saved.', 'success');
+            openTicketDetail(parseInt(ticketId)); // Refresh the detail modal
+            loadTickets();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Update Failed', err.detail || 'Could not save changes', 'error');
+        }
+    } catch { /* handled by apiFetch */ }
+});
+
+/**
+ * Handles posting a new comment on the current ticket.
+ * Uses the PUT /api/tickets/{id} endpoint with comment_text in the body.
+ */
+// PUT /api/tickets/{ticket_id} - Add a comment to an existing ticket
+document.getElementById('form-add-comment').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const ticketId = document.getElementById('td-active-id').value;
+    const commentText = document.getElementById('td-comment-text').value.trim();
+    if (!ticketId || !commentText) return;
+
+    const payload = { comment_text: commentText };
+
+    try {
+        const res = await apiFetch(`${API}/api/tickets/${ticketId}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+            toast('Comment Posted', 'Your comment was added.', 'success');
+            document.getElementById('td-comment-text').value = '';
+            openTicketDetail(parseInt(ticketId)); // Refresh to show new comment
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Error', err.detail || 'Failed to add comment', 'error');
+        }
+    } catch { /* handled by apiFetch */ }
+});
+
+/**
+ * Deletes a ticket by ID after user confirmation.
+ * @param {number} ticketId - Ticket primary key
+ */
+// DELETE /api/tickets/{ticket_id} - Permanently remove a ticket
+async function deleteTicket(ticketId) {
+    if (!confirm('Permanently delete this ticket? This cannot be undone.')) return;
+    try {
+        const res = await apiFetch(`${API}/api/tickets/${ticketId}`, { method: 'DELETE' });
+        if (res.ok) {
+            toast('Deleted', 'Ticket removed successfully.', 'success');
+            closeModal('modal-ticket-detail');
+            loadTickets();
+        } else {
+            const err = await res.json().catch(() => ({}));
+            toast('Error', err.detail || 'Failed to delete ticket', 'error');
+        }
+    } catch { /* handled by apiFetch */ }
+}
+
+
+// =====================================================================
+// ===== USERS SECTION =====
+// =====================================================================
+
+// Open user registration modal
+document.getElementById('btn-new-user').addEventListener('click', () => {
+    document.getElementById('form-user').reset();
+    openModal('modal-user');
+});
+
+
+// =====================================================================
+// ===== APPLICATION INITIALIZATION =====
+// =====================================================================
+
+/**
+ * Main boot function: validates stored token, sets up the UI for the user's role,
+ * and navigates to the appropriate landing page.
+ */
+function bootApp() {
+    const token = localStorage.getItem('access_token');
+    if (!token) { logout(); return; }
+
+    currentUser = parseJWT(token);
+    if (!currentUser || !currentUser.role) { logout(); return; }
+
+    // Check if token has expired
+    if (currentUser.exp && currentUser.exp * 1000 < Date.now()) {
+        // Try refresh silently
+        tryRefreshToken().then(ok => {
+            if (!ok) { logout(); return; }
+            finishBoot();
+        });
+        return;
+    }
+
+    finishBoot();
+}
+
+/**
+ * Completes the boot sequence after token validation.
+ * Sets up the sidebar, profile display, and navigates to the landing page.
+ */
+function finishBoot() {
+    loggedInUsername = localStorage.getItem('username') || 'Operator';
+
+    // Show app, hide login
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app-shell').style.display = 'block';
+
+    // Set profile info in sidebar
+    document.getElementById('sb-name').textContent = loggedInUsername;
+    document.getElementById('sb-role').textContent = currentUser.role.replace('_', ' ');
+    document.getElementById('sb-avatar').textContent = loggedInUsername[0].toUpperCase();
+
+    // Build role-based navigation
+    buildNavigation();
+
+    // Navigate to the first available page for this role
+    const firstPage = NAV_ITEMS.find(n => hasRole(...n.roles));
+    if (firstPage) navigateTo(firstPage.id);
+}
+
+/**
+ * Entry point: runs when the page finishes loading.
+ * If tokens exist in localStorage, boot the app; otherwise show login.
+ */
+window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('access_token')) {
+        bootApp();
+    } else {
+        document.getElementById('login-page').style.display = 'flex';
+    }
+});
+</script>
+</body>
+</html>
